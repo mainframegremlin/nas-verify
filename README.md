@@ -7,6 +7,8 @@ SHA-256 integrity verifier for SMB-mounted Synology NAS shares. Scans your NAS, 
 - **scan** — walks all configured mount points, computes a SHA-256 checksum for every file, and stores the results in a local SQLite database. Run this once to establish a baseline, then again periodically to update it.
 - **verify** — re-hashes every file and compares against the stored baseline. Reports corrupted, missing, changed, and new files. Writes a JSON diff log and optionally sends an email alert on failure.
 
+See [process.md](process.md) for guidance on when to run each command.
+
 ---
 
 ## Requirements
