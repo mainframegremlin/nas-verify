@@ -1,0 +1,41 @@
+# nas-verify configuration
+# Copy this file to config.toml and adjust for your environment.
+
+[nas]
+# List of absolute paths to SMB-mounted NAS shares.
+# Add as many as you like — all are scanned and verified together.
+mount_paths = [
+    "/mnt/nas",
+]
+
+[database]
+# Where to store the SQLite checksum database
+db_path = "~/.local/share/nas-verify/checksums.db"
+
+[scan]
+# Glob patterns matched against relative file paths (fnmatch syntax).
+# Files matching any pattern are skipped in both scan and verify.
+exclude_patterns = [
+    "**/@eaDir/**",                       # Synology thumbnail/metadata cache
+    "**/#recycle/**",                     # Synology recycle bin
+    "**/.SynologyWorkingDirectory/**",    # Synology working files
+    "**/.DS_Store",                       # macOS metadata
+    "**/Thumbs.db",                       # Windows thumbnail cache
+]
+# Read buffer size in bytes for SHA-256 hashing.
+# Increase (e.g. 4194304 = 4 MiB) if your NAS has fast I/O.
+chunk_size = 1048576
+
+[email]
+# Set enabled = true and fill in your SMTP details to receive alerts.
+enabled = false
+smtp_host = "smtp.example.com"
+smtp_port = 587          # 587 = STARTTLS, 465 = SMTP_SSL
+use_tls = true
+username = "alerts@example.com"
+# SECURITY: prefer setting the NAS_VERIFY_SMTP_PASSWORD environment variable
+# instead of storing your password here.
+password = ""
+from_addr = "nas-verify <alerts@example.com>"
+to_addrs = ["you@example.com"]
+subject = "NAS Integrity Alert on {hostname} — {n_corrupted} corrupted, {n_missing} missing [{date}]"

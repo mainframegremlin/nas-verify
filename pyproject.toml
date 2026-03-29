@@ -1,0 +1,47 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "nas-verify"
+version = "0.1.0"
+description = "SHA-256 integrity verifier for SMB-mounted Synology NAS shares"
+readme = "setup_guide.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+dependencies = [
+    "click>=8.1",
+    "tqdm>=4.66",
+    "tomli>=2.0; python_version < '3.11'",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.4",
+    "mypy>=1.9",
+]
+
+[project.scripts]
+nas-verify = "nas_verify.cli:cli"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nas_verify"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+files = ["src/"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=nas_verify --cov-report=term-missing"
