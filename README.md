@@ -130,7 +130,7 @@ Use `--config` to point at a different config file:
 nas-verify --config /path/to/other.toml verify
 ```
 
-Exits with code `0` if all files match, `1` if any problems are found — suitable for use in cron or scripts.
+Exits with code `0` if all files match, `1` if any problems are found—suitable for use in cron or scripts.
 
 ### Example output
 
