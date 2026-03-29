@@ -20,7 +20,7 @@ SHA-256 integrity verifier for SMB-mounted Synology NAS shares. Scans your NAS, 
 ## Installation
 
 ```bash
-git clone <repo>
+git clone https://github.com/mainframegremlin/nas-verify.git
 cd nas-verify
 
 python3 -m venv .venv
