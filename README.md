@@ -59,15 +59,11 @@ sudo chmod 600 /etc/nas-credentials
 sudo mkdir -p /mnt/nas/pictures
 ```
 
-> Name each mount point after the share it contains — `/mnt/nas/pictures`, `/mnt/nas/videos`, `/mnt/nas/documents`, etc. This keeps things readable as you add more shares.
-
 **Add to `/etc/fstab`**:
 
 ```
 //YOUR_NAS_IP/pictures  /mnt/nas/pictures  cifs  credentials=/etc/nas-credentials,uid=1000,gid=1000,iocharset=utf8,vers=3.0,_netdev,noauto,x-systemd.automount,x-systemd.idle-timeout=60  0  0
 ```
-
-> Tip: run `id` to confirm your uid/gid. On most single-user installs it's 1000.
 
 **Mount and verify:**
 
