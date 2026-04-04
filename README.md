@@ -1,21 +1,21 @@
 # nas-verify
 
-SHA-256 integrity verifier for SMB-mounted Synology NAS shares. Scans your NAS, stores a checksum baseline in SQLite, and alerts you when files are corrupted, missing, or changed.
+SHA-256 integrity verifier for SMB-mounted Synology NAS shares. Scans a NAS, stores a checksum baseline in SQLite, and alerts when files are corrupted, missing, or changed.
 
 ## How it works
 
-- **scan** — walks all configured mount points, computes a SHA-256 checksum for every file, and stores the results in a local SQLite database. Run this once to establish a baseline, then again periodically to update it.
+- **scan** — walks configured mount points, computes a SHA-256 checksum for every file, and stores the results in a local SQLite database. Run this once to establish a baseline, then again periodically to update it.
 - **verify** — re-hashes every file and compares against the stored baseline. Reports corrupted, missing, changed, and new files. Writes a JSON diff log and optionally sends an email alert on failure.
 
-See [process.md](process.md) for guidance on when to run each command.
+See [process.md](process.md) for guidance.
 
 ---
 
 ## Requirements
 
 - Python 3.10+
-- Linux with `cifs-utils` installed
-- A Synology NAS with SMB enabled
+- `cifs-utils`
+- NAS with SMB enabled
 
 ---
 
@@ -35,15 +35,9 @@ pip install -e .
 
 ## First-time setup
 
-### 1. Mount your first NAS share
+### 1. Mount NAS share
 
-**Install cifs-utils (varies based on pkg manager):**
-
-```bash
-sudo apt update && sudo apt install cifs-utils
-```
-
-**Create the credentials file** (keeps your password out of fstab):
+**Create the credentials file**:
 
 ```bash
 sudo nano /etc/nas-credentials
@@ -59,7 +53,7 @@ domain=WORKGROUP
 sudo chmod 600 /etc/nas-credentials
 ```
 
-**Create the mount point** (named after the NAS share):
+**Create the mount point**:
 
 ```bash
 sudo mkdir -p /mnt/nas/pictures
@@ -67,10 +61,10 @@ sudo mkdir -p /mnt/nas/pictures
 
 > Name each mount point after the share it contains — `/mnt/nas/pictures`, `/mnt/nas/videos`, `/mnt/nas/documents`, etc. This keeps things readable as you add more shares.
 
-**Add to `/etc/fstab`** (replace `NAS_IP` with your Synology's IP):
+**Add to `/etc/fstab`**:
 
 ```
-//NAS_IP/pictures  /mnt/nas/pictures  cifs  credentials=/etc/nas-credentials,uid=1000,gid=1000,iocharset=utf8,vers=3.0,_netdev,noauto,x-systemd.automount,x-systemd.idle-timeout=60  0  0
+//YOUR_NAS_IP/pictures  /mnt/nas/pictures  cifs  credentials=/etc/nas-credentials,uid=1000,gid=1000,iocharset=utf8,vers=3.0,_netdev,noauto,x-systemd.automount,x-systemd.idle-timeout=60  0  0
 ```
 
 > Tip: run `id` to confirm your uid/gid. On most single-user installs it's 1000.
@@ -100,7 +94,7 @@ mount_paths = [
 ]
 ```
 
-### 3. Run your first scan
+### 3. Run the first scan
 
 ```bash
 nas-verify scan --notes "initial baseline"
@@ -131,8 +125,6 @@ Use `--config` to point at a different config file:
 ```bash
 nas-verify --config /path/to/other.toml verify
 ```
-
-Exits with code `0` if all files match, `1` if any problems are found—suitable for use in cron or scripts.
 
 ### Example output
 
@@ -171,7 +163,7 @@ On failure:
 
 ### 1. Create the mount point
 
-Name it after the share (e.g. adding a `videos` share):
+Name it after the share:
 
 ```bash
 sudo mkdir -p /mnt/nas/videos
@@ -183,10 +175,10 @@ sudo mkdir -p /mnt/nas/videos
 sudo nano /etc/fstab
 ```
 
-Add a new line following the same pattern — share name matches the mount point name:
+Add a new line following the same pattern:
 
 ```
-//NAS_IP/videos  /mnt/nas/videos  cifs  credentials=/etc/nas-credentials,uid=1000,gid=1000,iocharset=utf8,vers=3.0,_netdev,noauto,x-systemd.automount,x-systemd.idle-timeout=60  0  0
+//YOUR_NAS_IP/videos  /mnt/nas/videos  cifs  credentials=/etc/nas-credentials,uid=1000,gid=1000,iocharset=utf8,vers=3.0,_netdev,noauto,x-systemd.automount,x-systemd.idle-timeout=60  0  0
 ```
 
 ### 3. Mount it
@@ -214,25 +206,6 @@ nas-verify scan --rebuild --notes "added videos share"
 ```
 
 The `--rebuild` flag clears the old baseline before scanning so there are no stale entries from previous mount configurations.
-
----
-
-## Automating with cron
-
-Run verification nightly at 2 AM:
-
-```bash
-sudo mkdir -p /var/log/nas-verify
-sudo chown $USER /var/log/nas-verify
-
-crontab -e
-```
-
-Add:
-
-```cron
-0 2 * * * /home/youruser/code/nas-verify/.venv/bin/nas-verify verify --json-out /var/log/nas-verify/diff-$(date +\%Y\%m\%d).json >> /var/log/nas-verify/verify.log 2>&1
-```
 
 ---
 
